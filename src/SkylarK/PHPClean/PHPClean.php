@@ -34,10 +34,10 @@ class PHPClean
 		$this->_source = "";
 		$this->_result = "";
 		$this->_nl_tokens = array(
-			T_ECHO, T_FUNCTION
+			T_ECHO, T_FUNCTION, T_CLASS
 		);
 		$this->_tab_tokens = array(
-			T_ECHO, T_FUNCTION
+			T_ECHO, T_FUNCTION, T_CLASS
 		);
 		$this->_stack_tokens = array(
 			
@@ -78,15 +78,15 @@ class PHPClean
 	/**
 	 * Process a result.
 	 */
-	protected function addResult($tokenid, $result, $stack_count) {
+	protected function addResult($tokenid, $token, $stack_count) {
 		// Should we be tabbing in?
-		if (in_array($tokenid, $this->_tab_tokens)) {
+		if (in_array($tokenid, $this->_tab_tokens) || $token === '}') {
 			for ($i = 0; $i < $stack_count; $i++) {
-				$result = "\t" . $result;
+				$token = "\t" . $token;
 			}
 		}
 
-		$this->_result .= $result;
+		$this->_result .= $token;
 	}
 
 	/**
