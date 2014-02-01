@@ -2,7 +2,10 @@
 
 class PHPCleanTest extends PHPUnit_Framework_TestCase
 {
+	private $_cleaner;
+
 	public function setUp() {
+		$this->_cleaner = new \SkylarK\PHPClean\PHPClean();
 	}
 
 	public static function tearDownAfterClass() {
@@ -12,8 +15,23 @@ class PHPCleanTest extends PHPUnit_Framework_TestCase
 	// Tests
 	// -----------------------------------------------------------------------------------------
 
-	public function test_Tokeniser() {
-		$cleaner = new \SkylarK\PHPClean\PHPClean();
-		$cleaner->cleanSource('<?php echo \'hello\'; ?>');
+	public function test_Basic() {
+		$php = "<?php echo 'hello';\n";
+		$expected = "<?php\necho 'hello';\n";
+
+		$this->_cleaner->cleanSource($php);
+		$result = $this->_cleaner->getResult();
+
+		$this->assertEquals($expected, $result);
+	}
+
+	public function test_LastNewLine() {
+		$php = "<?php\necho 'hello';";
+		$expected = "<?php\necho 'hello';\n";
+
+		$this->_cleaner->cleanSource($php);
+		$result = $this->_cleaner->getResult();
+
+		$this->assertEquals($expected, $result);
 	}
 }

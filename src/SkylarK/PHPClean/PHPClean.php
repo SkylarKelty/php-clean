@@ -18,12 +18,18 @@ class PHPClean
 	/** The result of the operation */
 	private $_result;
 
+	/** A list of tokens that require a new line before/after */
+	private $_nl_tokens;
+
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
 		$this->_source = "";
 		$this->_result = "";
+		$this->_nl_tokens = array(
+			T_ECHO, 
+		);
 	}
 
 	/**
@@ -31,7 +37,6 @@ class PHPClean
 	 */
 	public function cleanSource($source) {
 		$this->_source = $source;
-		$this->_result = "";
 		$this->clean();
 	}
 
@@ -62,7 +67,49 @@ class PHPClean
 	 * Protected clean method.
 	 */
 	protected function clean() {
+		$this->_result = "";
+
 		$tokens = token_get_all($this->_source);
-		print_r($tokens);
+
+		$prev = null;
+		foreach ($tokens as $token) {
+			// If this is just a character, skip out.
+			if (!is_array($token)) {
+				$this->_result .= $token;
+				$prev = $token;
+				continue;
+			}
+
+			$tokenid = $token[0];
+
+			// The next thing to add to result.
+			$out = $token[1];
+
+			// New line check.
+			if (in_array($tokenid, $this->_nl_tokens)) {
+				if ($prev[0] !== T_WHITESPACE) {
+					$this->_result .= "\n";
+				}
+			}
+
+			// Work out what to do.
+			switch ($tokenid) {
+				case T_WHITESPACE:
+					break;
+				default:
+					$out = trim($out);
+					break;
+			}
+
+
+			// Cleanup
+			$this->_result .= $out;
+
+			$prev = $token;
+		}
+
+		if (!is_array($prev) || $prev[1] !== "\n") {
+			$this->_result .= "\n";
+		}
 	}
 }
