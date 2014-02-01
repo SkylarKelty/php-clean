@@ -34,4 +34,14 @@ class PHPCleanTest extends PHPUnit_Framework_TestCase
 
 		$this->assertEquals($expected, $result);
 	}
+
+	public function test_tabs() {
+		$php = "<?php\nfunction test() {\necho 'hello';\n}\n";
+		$expected = "<?php\nfunction test() {\n\techo 'hello';\n}\n";
+
+		$this->_cleaner->cleanSource($php);
+		$result = $this->_cleaner->getResult();
+
+		$this->assertEquals($expected, $result);
+	}
 }

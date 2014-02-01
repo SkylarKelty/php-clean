@@ -21,6 +21,12 @@ class PHPClean
 	/** A list of tokens that require a new line before/after */
 	private $_nl_tokens;
 
+	/** A list of tokens that tab in a stack */
+	private $_tab_tokens;
+
+	/** A list of tokens that require addition to the stack */
+	private $_stack_tokens;
+
 	/**
 	 * Constructor.
 	 */
@@ -28,7 +34,13 @@ class PHPClean
 		$this->_source = "";
 		$this->_result = "";
 		$this->_nl_tokens = array(
-			T_ECHO, 
+			T_ECHO, T_FUNCTION
+		);
+		$this->_tab_tokens = array(
+			T_ECHO, T_FUNCTION
+		);
+		$this->_stack_tokens = array(
+			
 		);
 	}
 
@@ -64,18 +76,47 @@ class PHPClean
 	}
 
 	/**
+	 * Process a result.
+	 */
+	protected function addResult($tokenid, $result, $stack_count) {
+		// Should we be tabbing in?
+		if (in_array($tokenid, $this->_tab_tokens)) {
+			for ($i = 0; $i < $stack_count; $i++) {
+				$result = "\t" . $result;
+			}
+		}
+
+		$this->_result .= $result;
+	}
+
+	/**
 	 * Protected clean method.
 	 */
 	protected function clean() {
 		$this->_result = "";
 
+		// Current stack.
+		$stack = array();
+
+		// Our tokens.
 		$tokens = token_get_all($this->_source);
 
 		$prev = null;
 		foreach ($tokens as $token) {
 			// If this is just a character, skip out.
 			if (!is_array($token)) {
-				$this->_result .= $token;
+
+				// Is this closing off a stack item?
+				if ($token === '{') {
+					$stack[] = $token;
+				}
+
+				// Is this closing off a stack item?
+				if ($token === '}') {
+					$item = array_pop($stack);
+				}
+
+				$this->addResult(null, $token, count($stack));
 				$prev = $token;
 				continue;
 			}
@@ -84,6 +125,10 @@ class PHPClean
 
 			// The next thing to add to result.
 			$out = $token[1];
+			// Trim if we are not whitespace.
+			if ($tokenid !== T_WHITESPACE) {
+				$out = trim($out);
+			}
 
 			// New line check.
 			if (in_array($tokenid, $this->_nl_tokens)) {
@@ -92,19 +137,18 @@ class PHPClean
 				}
 			}
 
-			// Work out what to do.
-			switch ($tokenid) {
-				case T_WHITESPACE:
-					break;
-				default:
-					$out = trim($out);
-					break;
+			// Stack check.
+			if (in_array($tokenid, $this->_stack_tokens)) {
+				$stack[] = $token;
 			}
 
 
-			// Cleanup
-			$this->_result .= $out;
+			// Work out what to do.
+			switch ($tokenid) {
+			}
 
+			// Cleanup
+			$this->addResult($tokenid, $out, count($stack));
 			$prev = $token;
 		}
 
