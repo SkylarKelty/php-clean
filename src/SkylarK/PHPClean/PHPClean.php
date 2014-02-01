@@ -34,11 +34,11 @@ class PHPClean
 		$this->_source = "";
 		$this->_result = "";
 		$this->_nl_tokens = array(
-			T_ECHO, T_FUNCTION, T_CLASS
+			T_ECHO, T_FUNCTION, T_CLASS, T_INTERFACE, T_CASE, T_CATCH, T_CONTINUE, T_DO, T_IF,
+			T_INCLUDE, T_INCLUDE_ONCE, T_REQUIRE, T_REQUIRE_ONCE, T_SWITCH, T_THROW, T_TRAIT,
+			T_PRINT, T_PRIVATE, T_PUBLIC, T_PROTECTED, T_RETURN, T_TRY, T_UNSET, T_VARIABLE, T_YIELD
 		);
-		$this->_tab_tokens = array(
-			T_ECHO, T_FUNCTION, T_CLASS
-		);
+		$this->_tab_tokens = $this->_nl_tokens;
 		$this->_stack_tokens = array(
 			
 		);
