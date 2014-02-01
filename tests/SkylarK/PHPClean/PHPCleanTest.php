@@ -54,4 +54,24 @@ class PHPCleanTest extends PHPUnit_Framework_TestCase
 
 		$this->assertEquals($expected, $result);
 	}
+
+	public function test_assignment() {
+		$php = "<?php\nclass test {\nfunction test() {\n\$a = 'test';\n}\n}\n";
+		$expected = "<?php\nclass test {\n\tfunction test() {\n\t\t\$a = 'test';\n\t}\n}\n";
+
+		$this->_cleaner->cleanSource($php);
+		$result = $this->_cleaner->getResult();
+
+		$this->assertEquals($expected, $result);
+	}
+
+	public function test_inline_function() {
+		$php = "<?php\nclass test {\nfunction test() {\n\$a = function() { return 'hey'; };\n}\n}\n";
+		$expected = "<?php\nclass test {\n\tfunction test() {\n\t\t\$a = function() {\n\t\t\treturn 'hey';\n\t\t};\n\t}\n}\n";
+
+		$this->_cleaner->cleanSource($php);
+		$result = $this->_cleaner->getResult();
+
+		$this->assertEquals($expected, $result);
+	}
 }
